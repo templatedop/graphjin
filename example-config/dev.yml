@@ -1,0 +1,91 @@
+app_name: "GraphJin Example"
+host_port: 0.0.0.0:8080
+web_ui: true
+
+# Development mode - allows all queries, introspection enabled
+production: false
+
+# Logging
+log_level: "info"
+log_format: "plain"
+
+# Enable debug features
+debug: true
+server_timing: true
+enable_tracing: true
+
+# Watch for config changes and auto-reload
+reload_on_config_change: true
+
+# Database connection
+# Update these values for your database
+database:
+  type: postgres              # or mysql
+  host: localhost
+  port: 5432                  # 3306 for MySQL
+  dbname: graphjin_dev
+  user: postgres
+  password: postgres
+  pool_size: 10
+
+# Authentication (set to 'none' for development)
+auth:
+  type: none
+  cookie: _graphjin_session
+
+# Security
+secret_key: "supercalifragilisticexpialidocious12"
+
+# CORS - allow all origins in development
+cors_allowed_origins: ["*"]
+
+# Default limit for queries
+default_limit: 20
+
+# Tables to exclude from introspection
+blocklist:
+  - ar_internal_metadata
+  - schema_migrations
+  - secret
+  - password
+  - encrypted
+  - token
+
+# Role-based access control
+roles:
+  # Anonymous users (not authenticated)
+  - name: anon
+    tables:
+      - name: users
+        query:
+          limit: 10
+          # Only return published/public data
+          # filters: ["{ is_public: { eq: true } }"]
+
+  # Authenticated users
+  - name: user
+    tables:
+      - name: users
+        query:
+          # Users can see their own data
+          filters: ["{ id: { eq: $user_id } }"]
+
+        update:
+          # Users can only update their own data
+          filters: ["{ id: { eq: $user_id } }"]
+          # Prevent changing certain fields
+          # columns: ["name", "email"]
+
+        delete:
+          # Prevent users from deleting their accounts
+          block: true
+
+# Optional: Define custom variables
+# variables:
+#   admin_account_id: "1"
+
+# Optional: Rate limiting
+# rate_limiter:
+#   rate: 100
+#   bucket: 200
+#   ip_header: X-Forwarded-For

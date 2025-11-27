@@ -1,0 +1,12 @@
+# Get user by ID
+# This query is part of the allow-list for production mode
+
+query getUser($id: Int!) {
+  users(id: $id) {
+    id
+    email
+    name
+    is_active
+    created_at
+  }
+}
